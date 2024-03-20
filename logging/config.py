@@ -782,7 +782,7 @@ class DictConfigurator(BaseConfigurator):
                     raise ValueError('Unable to set target handler %r' % tn) from e
             elif issubclass(klass, logging.handlers.QueueHandler):
                 # Another special case for handler which refers to other handlers
-                # if 'handlers' not in config:
+                # if 'handlers' not in configs:
                     # raise ValueError('No handlers specified for a QueueHandler')
                 if 'queue' in config:
                     from multiprocessing.queues import Queue as MPQueue
@@ -946,7 +946,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT, verify=None):
             Handle a request.
 
             Each request is expected to be a 4-byte length, packed using
-            struct.pack(">L", n), followed by the config file.
+            struct.pack(">L", n), followed by the configs file.
             Uses fileConfig() to do the grunt work.
             """
             try:
@@ -982,7 +982,7 @@ def listen(port=DEFAULT_LOGGING_CONFIG_PORT, verify=None):
 
     class ConfigSocketReceiver(ThreadingTCPServer):
         """
-        A simple TCP socket-based logging config receiver.
+        A simple TCP socket-based logging configs receiver.
         """
 
         allow_reuse_address = 1
