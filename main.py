@@ -55,9 +55,9 @@ def create_db(folder_path, images_path):
     index_path = pathlib.Path(folder_path) / "index.faiss"
     config_path = pathlib.Path(folder_path) / "config.json"
 
-    logger.info(f"Database path: {db_path}")
-    logger.info(f"Index path: {index_path}")
-    logger.info(f"Config path: {config_path}")
+    logger.debug(f"Database path: {db_path}")
+    logger.debug(f"Index path: {index_path}")
+    logger.debug(f"Config path: {config_path}")
 
     if db_path.exists():
         try:
@@ -76,12 +76,14 @@ def create_db(folder_path, images_path):
             embedding_dim=512,
             similarity="cosine",
             embedding_field="meta",
-            batch_size=10
         )
 
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
+    existing_images = set()
+
     for file_path in pathlib.Path(images_path).glob("*"):
         if file_path.suffix.lower() in image_extensions:
+            existing_images.add(str(file_path))
             try:
                 image = Document(
                     content=str(file_path),
@@ -92,9 +94,17 @@ def create_db(folder_path, images_path):
             except Exception as e:
                 logger.error(f"Error processing file {file_path}. Reason: {str(e)}")
 
-    document_store.update_embeddings(retriever=get_multimodal_retriever(document_store), update_existing_embeddings=False)
+    # Delete embeddings for non-existing image files
+    all_documents = document_store.get_all_documents()
+    for doc in all_documents:
+        if doc.content not in existing_images:
+            logger.debug(f"Deleting embeddings for non-existing image: {doc.content}")
+            document_store.delete_documents(ids=[doc.id])
+
+    document_store.update_embeddings(retriever=get_multimodal_retriever(document_store),
+                                     update_existing_embeddings=False)
     document_store.save(index_path=str(index_path), config_path=str(config_path))
-    logger.info("FAISS database created/updated successfully.")
+    logger.debug("FAISS database created/updated successfully.")
 
 
 def load_db(db_path):
@@ -105,11 +115,11 @@ def load_db(db_path):
         return document_store
     except Exception as e:
         logger.error(f"Error loading FAISS database. Reason: {str(e)}")
-        sys.exit()
         return None
 
 
 def get_multimodal_retriever(document_store):
+    logger.debug("Loading images retriever...")
     retriever_text_to_image = MultiModalRetriever(
         document_store=document_store,
         query_embedding_model="sentence-transformers/clip-ViT-B-32",
@@ -119,6 +129,7 @@ def get_multimodal_retriever(document_store):
         similarity_function="cosine",
         devices=[config.multimodalretriever.devices],
     )
+    logger.debug("Images retriever loaded successfully.")
     return retriever_text_to_image
 
 
@@ -133,7 +144,7 @@ def search_images(image_path, db_path):
     logger.info(f"Searching for image: {img_path}")
     similar_images = retriever.retrieve(query=str(img_path), query_type="image", document_store=document_store)
     logger.info("TOP 3 - Found similar images:")
-    print(similar_images)
+
     for image in similar_images:
         logger.info(f"Score: {round(image.score*100, 2)}%; Image: {image.meta['filename']}")
 
@@ -152,5 +163,5 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level="INFO")
+    #logging.basicConfig(level="INFO")
     main()
