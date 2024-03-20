@@ -14,7 +14,12 @@ torchvision = {url = "https://download.pytorch.org/whl/cu118/torchvision-0.16.0%
 torchaudio = {url = "https://download.pytorch.org/whl/cu118/torchaudio-2.1.0%2Bcu118-cp310-cp310-linux_x86_64.whl"}
 farm-haystack = {extras = ["sql"], version = "^1.25.0"}
 faiss-gpu = "^1.7.2"
+sentence-transformers = "^2.5.1"
+colorlog = "^6.8.2"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.3"
 
 [build-system]
 requires = ["poetry-core"]
