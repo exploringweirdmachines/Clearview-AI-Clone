@@ -1,1 +1,87 @@
-# Requirements
+## ClearView-AI 
+
+The title is kinda misleading but the idea is the same: using an image to find similar images.
+A better name, more descriptive would be "image-to-image search" tool. The fact that you can search for faces, is just a feature, not a bug.
+
+## Usage
+
+First you have to index a folder containing a set of images. This command will create a FAISS database in the target folder,
+'examples/vector_database', will add entries in the database using the filename of each picture and also the corresponding embeddings:
+
+```bash
+poetry run main.py create_db -f examples/images -o examples/vector_database
+```
+
+Then you can search for similar images like this:
+```bash
+poetry run python main.py search_db -d examples/vector_database/ -i examples/target_image/Ilya.png
+```
+
+## Examples
+
+Given the input image found in 'examples/target_image/Ilya.png'
+
+#### Command:
+```bash
+poetry run python main.py search_db -d examples/vector_database/ -i examples/target_image/Ilya.png
+```
+
+#### Input image
+![Ilya.png](examples%2Ftarget_image%2FIlya.png)
+
+#### Output
+![output ilya.png](resources%2Foutput%20ilya.png)
+
+___
+The images are found in 'examples/images':
+
+Score: **90.14%** for 'examples/images/**Ilya s.png**' <br> 
+![Ilya s.png](examples%2Fimages%2FIlya%20s.png)
+
+
+Score: **83.3%**; for 'examples/images/**team openai.png**' <br>
+![team openai.png](examples%2Fimages%2Fteam%20openai.png)
+
+Score: 80.64%; for 'examples/images/**team.png**' <br>
+![team.png](examples%2Fimages%2Fteam.png)
+
+-----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+Another example with some other image as input, such as: <br>
+'examples/target_image/moon.png'
+
+#### Command:
+```bash
+poetry run python main.py search_db -d examples/vector_database/ -i examples/target_image/moon.png
+```
+
+#### Input image
+![moon.png](examples%2Ftarget_image%2Fmoon.png)
+
+#### Output 
+![output moon.png](resources%2Foutput%20moon.png)
+
+___
+The images are found in 'examples/images':
+
+Score: **92.49%** for 'examples/images/**moontree.png*' <br> 
+![moontree.png](examples%2Fimages%2Fmoontree.png)
+
+
+Score: **84.37%**; for 'examples/images/**tree.png**' <br>
+![tree.png](examples%2Fimages%2Ftree.png)
+
+Score: **84.31%**; for 'examples/images/**some tree.jpg**' <br>
+![some tree.jpg](examples%2Fimages%2Fsome%20tree.jpg)
+
+
+
+## Dataset
+These are the images you can find in 'examples/images' folder:
+![images_dataset.png](resources%2Fimages_dataset.png)
+
+
+## Requirements
+```bash
+poetry install
+```
