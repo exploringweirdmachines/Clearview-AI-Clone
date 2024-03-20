@@ -1,0 +1,1 @@
+{"faiss_config_path": "examples/vector_database/config.json", "sql_url": "sqlite:////home/robot/projects/Clearview-AI-Clone/examples/vector_database/faiss_db.db", "faiss_index_factory_str": "Flat", "index": "image_files", "embedding_dim": 512, "similarity": "cosine", "embedding_field": "meta"}
