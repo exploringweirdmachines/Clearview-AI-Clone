@@ -1,7 +1,7 @@
 import argparse
 import atexit
-import sys
 import box
+import sys
 import yaml
 import pathlib
 import logging.config
@@ -29,9 +29,8 @@ def setup_logging():
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        prog="Image Finder",
+        prog=f"{sys.argv[0]}",
         description="Tool which finds images given an image as input",
-        epilog="Thanks for using {prog}"
     )
     parser.add_argument("-v", "--version", dest="version", action="version", version=f"%(prog)% {config.version}")
 
@@ -46,6 +45,7 @@ def create_parser():
     load_db_parser.add_argument("-d", "--db_path", type=str, required=True, help="Path to the FAISS database", default="examples/vector_database")
     load_db_parser.add_argument("-i", "--image_path", type=str, required=True, help="Path to the target image")
 
+    parser.epilog = "Thanks for using %s" % parser.prog
     return parser
 
 
@@ -163,5 +163,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #logging.basicConfig(level="INFO")
+    logging.basicConfig(level="INFO")
     main()
