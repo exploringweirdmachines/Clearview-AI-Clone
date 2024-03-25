@@ -1,11 +1,15 @@
 import argparse
 import atexit
+from typing import Optional
+
 import box
 import sys
 import yaml
 import pathlib
+
 import logging.config
 import logging.handlers
+
 from haystack.document_stores import FAISSDocumentStore
 from haystack.nodes import MultiModalRetriever
 from haystack import Document
@@ -30,22 +34,28 @@ def setup_logging():
 def create_parser():
     parser = argparse.ArgumentParser(
         prog=f"{sys.argv[0]}",
-        description="Tool which finds images given an image as input",
+        description="Tool which finds images in the target folder, given text or an image as input.",
     )
     parser.add_argument("-v", "--version", dest="version", action="version", version=f"%(prog)% {config.version}")
 
     subparsers = parser.add_subparsers(dest="command", title="Commands", metavar="COMMAND")
 
     create_db_parser = subparsers.add_parser("create_db", help="Create a new FAISS database")
-    create_db_parser.add_argument("-f", "--files", type=str, required=True, help="Path to the folder containing images", default="examples/images")
+    create_db_parser.add_argument("-f", "--files", type=str, required=True, help="Path to the folder containing images", default="examples/images", metavar="<SOME FOLDER WITH IMAGES>")
     create_db_parser.add_argument("-o", "--output", type=str, required=True,
-                                  help="Output path of the faiss database files", default="examples/vector_database")
+                                  help="Output path of the faiss database files", default="examples/vector_database", metavar="SOME FOLDER WHERE YOU STORE THE DATABASE FILES")
 
     load_db_parser = subparsers.add_parser("search_db", help="Search a database for an image")
     load_db_parser.add_argument("-d", "--db_path", type=str, required=True, help="Path to the FAISS database", default="examples/vector_database")
-    load_db_parser.add_argument("-i", "--image_path", type=str, required=True, help="Path to the target image")
 
-    parser.epilog = "Thanks for using %s" % parser.prog
+    # Create a mutually exclusive group for image_query and text_query
+    query_group = load_db_parser.add_mutually_exclusive_group(required=True)
+    query_group.add_argument("-i", "--image_query", help="Path to the target image to search for images")
+    query_group.add_argument("-t", "--text_query", type=str, help="Text query to search for images")
+
+    parser.epilog = "You can also see help for the commands like 'main.py searchdb -h'"
+
+
     return parser
 
 
@@ -118,35 +128,55 @@ def load_db(db_path):
         return None
 
 
-def get_multimodal_retriever(document_store):
-    logger.debug("Loading images retriever...")
+def get_multimodal_retriever(document_store, type_query):
+    logger.debug("Loading retriever...")
     retriever_text_to_image = MultiModalRetriever(
         document_store=document_store,
         query_embedding_model="sentence-transformers/clip-ViT-B-32",
-        query_type="image",
-        document_embedding_models={"image": "sentence-transformers/clip-ViT-B-32"},
+        document_embedding_models={f"{type_query}": "sentence-transformers/clip-ViT-B-32"},
         top_k=3,
         similarity_function="cosine",
         devices=[config.multimodalretriever.devices],
     )
-    logger.debug("Images retriever loaded successfully.")
+    logger.debug("Retriever loaded successfully.")
     return retriever_text_to_image
 
 
-def search_images(image_path, db_path):
+def search_with_image(db_path: str, input_image: str | pathlib.Path):
     document_store = load_db(db_path)
     if document_store is None:
         logger.error("No FAISS database loaded. Please load or create a database first.")
         return
 
-    retriever = get_multimodal_retriever(document_store)
-    img_path = pathlib.Path.cwd() / image_path
-    logger.info(f"Searching for image: {img_path}")
-    similar_images = retriever.retrieve(query=str(img_path), query_type="image", document_store=document_store)
-    logger.info("TOP 3 - Found similar images:")
+    retriever_image = get_multimodal_retriever(document_store, type_query="image")
 
+    logger.info(f"Searching for image:")
+
+    img_path = pathlib.Path.cwd() / input_image
+    logger.info(f"TEST {img_path}")
+    similar_images = retriever_image.retrieve(query=str(img_path), query_type="image", document_store=document_store)
+
+    logger.info(f"Based on input image query {input_image}")
+    if similar_images is not None:
+        logger.info(f"Found similar images:")
     for image in similar_images:
         logger.info(f"Score: {round(image.score*100, 2)}%; Image: {image.meta['filename']}")
+
+
+def search_with_text(db_path: str, input_text: str):
+    document_store = load_db(db_path)
+    if document_store is None:
+        logger.error("No FAISS database loaded. Please load or create a database first.")
+        return
+
+    retriever_text = get_multimodal_retriever(document_store, type_query="text")
+    similar_images = retriever_text.retrieve(query=input_text, query_type="text", document_store=document_store)
+    logger.info(f"Based on input text query {input_text}")
+
+    if similar_images is not None:
+        logger.info(f"Found similar images:")
+    for result in similar_images:
+        logger.info(f"Score: {round(result.score * 100, 2)}%; Image: {result.meta['filename']}")
 
 
 def main():
@@ -157,9 +187,14 @@ def main():
     if args.command == "create_db":
         create_db(args.output, args.files)
     elif args.command == "search_db":
-        search_images(pathlib.Path(args.image_path), args.db_path)
+        if type(args.image_query) is str:
+            search_with_image(input_image=pathlib.Path(args.image_query), db_path=args.db_path)
+        elif type(args.text_query) is (str or pathlib.Path):
+            search_with_text(input_text=args.text_query, db_path=args.db_path)
     else:
         parser.print_help()
+        parser.parse_args(["search_db", "--help"])
+
 
 
 if __name__ == '__main__':
