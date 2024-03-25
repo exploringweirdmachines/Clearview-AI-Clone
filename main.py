@@ -53,8 +53,7 @@ def create_parser():
     query_group.add_argument("-i", "--image_query", type=str, help="Path to the target image to search for images")
     query_group.add_argument("-t", "--text_query", type=str, help="Text query to search for images")
 
-    parser.epilog = "You can also see help for the commands like 'main.py searchdb -h'"
-
+    parser.epilog = f"You can also see help for the commands like '{sys.argv[0]} searchdb -h'"
 
     return parser
 
