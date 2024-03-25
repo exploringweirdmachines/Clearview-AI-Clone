@@ -50,7 +50,7 @@ def create_parser():
 
     # Create a mutually exclusive group for image_query and text_query
     query_group = load_db_parser.add_mutually_exclusive_group(required=True)
-    query_group.add_argument("-i", "--image_query", help="Path to the target image to search for images")
+    query_group.add_argument("-i", "--image_query", type=str, help="Path to the target image to search for images")
     query_group.add_argument("-t", "--text_query", type=str, help="Text query to search for images")
 
     parser.epilog = "You can also see help for the commands like 'main.py searchdb -h'"
@@ -128,12 +128,13 @@ def load_db(db_path):
         return None
 
 
-def get_multimodal_retriever(document_store, type_query):
+def get_multimodal_retriever(document_store, search_type):
     logger.debug("Loading retriever...")
     retriever_text_to_image = MultiModalRetriever(
         document_store=document_store,
+        query_type=f"{search_type}",
         query_embedding_model="sentence-transformers/clip-ViT-B-32",
-        document_embedding_models={f"{type_query}": "sentence-transformers/clip-ViT-B-32"},
+        document_embedding_models={f"{search_type}": "sentence-transformers/clip-ViT-B-32"},
         top_k=3,
         similarity_function="cosine",
         devices=[config.multimodalretriever.devices],
@@ -142,23 +143,19 @@ def get_multimodal_retriever(document_store, type_query):
     return retriever_text_to_image
 
 
-def search_with_image(db_path: str, input_image: str | pathlib.Path):
+def search_with_image(db_path: str, input_image):
     document_store = load_db(db_path)
     if document_store is None:
         logger.error("No FAISS database loaded. Please load or create a database first.")
         return
 
-    retriever_image = get_multimodal_retriever(document_store, type_query="image")
-
-    logger.info(f"Searching for image:")
-
+    retriever = get_multimodal_retriever(document_store, search_type="image")
     img_path = pathlib.Path.cwd() / input_image
-    logger.info(f"TEST {img_path}")
-    similar_images = retriever_image.retrieve(query=str(img_path), query_type="image", document_store=document_store)
+    logger.info(f"Searching for image: {img_path}")
+    similar_images = retriever.retrieve(query=str(img_path), query_type="image", document_store=document_store)
 
-    logger.info(f"Based on input image query {input_image}")
-    if similar_images is not None:
-        logger.info(f"Found similar images:")
+    if similar_images:
+        logger.info("Found similar images:")
     for image in similar_images:
         logger.info(f"Score: {round(image.score*100, 2)}%; Image: {image.meta['filename']}")
 
@@ -169,11 +166,11 @@ def search_with_text(db_path: str, input_text: str):
         logger.error("No FAISS database loaded. Please load or create a database first.")
         return
 
-    retriever_text = get_multimodal_retriever(document_store, type_query="text")
+    retriever_text = get_multimodal_retriever(document_store, search_type="text")
     similar_images = retriever_text.retrieve(query=input_text, query_type="text", document_store=document_store)
-    logger.info(f"Based on input text query {input_text}")
+    logger.info(f"Based on input text query '{input_text}'")
 
-    if similar_images is not None:
+    if similar_images:
         logger.info(f"Found similar images:")
     for result in similar_images:
         logger.info(f"Score: {round(result.score * 100, 2)}%; Image: {result.meta['filename']}")
@@ -187,14 +184,13 @@ def main():
     if args.command == "create_db":
         create_db(args.output, args.files)
     elif args.command == "search_db":
-        if type(args.image_query) is str:
-            search_with_image(input_image=pathlib.Path(args.image_query), db_path=args.db_path)
-        elif type(args.text_query) is (str or pathlib.Path):
-            search_with_text(input_text=args.text_query, db_path=args.db_path)
+        if args.image_query:
+            search_with_image(db_path=args.db_path, input_image=args.image_query)
+        elif args.text_query:
+            search_with_text(db_path=args.db_path, input_text=args.text_query)
     else:
         parser.print_help()
         parser.parse_args(["search_db", "--help"])
-
 
 
 if __name__ == '__main__':
