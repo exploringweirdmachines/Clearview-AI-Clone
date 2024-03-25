@@ -105,11 +105,6 @@ Score: **84.31%**; for 'examples/images/**some tree.jpg**' <br>
 ![some tree.jpg](examples%2Fimages%2Fsome%20tree.jpg)
 
 
-
-## Dataset
-These are the images you can find in 'examples/images' folder:
-![images_dataset.png](resources%2Fimages_dataset.png)
-
 -----------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------
 Another example with text as input, such as:
