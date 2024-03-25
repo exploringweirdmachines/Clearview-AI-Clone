@@ -5,6 +5,36 @@ A better name, more descriptive would be "image-to-image search" tool. The fact 
 
 ## Usage
 
+```bash
+usage: main.py [-h] [-v] COMMAND ...
+
+Tool which finds images in the target folder, given text or an image as input.
+
+options:
+  -h, --help     show this help message and exit
+  -v, --version  show program's version number and exit
+
+Commands:
+  COMMAND
+    create_db    Create a new FAISS database
+    search_db    Search a database for an image
+
+You can also see help for the commands like 'main.py searchdb -h'
+usage: main.py search_db [-h] -d DB_PATH (-i IMAGE_QUERY | -t TEXT_QUERY)
+
+options:
+  -h, --help            show this help message and exit
+  -d DB_PATH, --db_path DB_PATH
+                        Path to the FAISS database
+  -i IMAGE_QUERY, --image_query IMAGE_QUERY
+                        Path to the target image to search for images
+  -t TEXT_QUERY, --text_query TEXT_QUERY
+                        Text query to search for images
+
+```
+
+
+
 First you have to index a folder containing a set of images. This command will create a FAISS database in the target folder,
 'examples/vector_database', will add entries in the database using the filename of each picture and also the corresponding embeddings:
 
@@ -64,7 +94,7 @@ poetry run python main.py search_db -d examples/vector_database/ -i examples/tar
 ___
 The images are found in 'examples/images':
 
-Score: **92.49%** for 'examples/images/**moontree.png*' <br> 
+Score: **92.49%** for 'examples/images/**moontree.png**' <br> 
 ![moontree.png](examples%2Fimages%2Fmoontree.png)
 
 
@@ -80,6 +110,22 @@ Score: **84.31%**; for 'examples/images/**some tree.jpg**' <br>
 These are the images you can find in 'examples/images' folder:
 ![images_dataset.png](resources%2Fimages_dataset.png)
 
+-----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+Another example with text as input, such as:
+
+#### Command:
+```bash
+poetry run python main.py search_db -d examples/vector_database/ -t "car inside a building"
+```
+
+#### Output 
+![text_search.png](resources/text_search.png)
+
+
+## Dataset
+These are the images you can find in 'examples/images' folder:
+![images_dataset.png](resources%2Fimages_dataset.png)
 
 ## Requirements
 ```bash
