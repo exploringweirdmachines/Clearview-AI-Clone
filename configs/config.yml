@@ -1,4 +1,16 @@
 version: "0.1"
 
-multimodalretriever:
-  devices: "cpu"
+# model card
+retriever_settings:
+  model: "sentence-transformers/clip-ViT-B-32"
+  devices: "cuda"
+  similarity_function: "cosine"
+  top_k: 3
+
+# FAISS db settings
+faiss_settings:
+  index_factory: "flat"
+  index: "image_files"
+  dimensions: 512
+  similarity_function: "cosine"
+  embedding_field: "meta"

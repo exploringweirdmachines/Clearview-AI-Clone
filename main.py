@@ -80,11 +80,11 @@ def create_db(folder_path, images_path):
         logger.info("Creating a new FAISS database.")
         document_store = FAISSDocumentStore(
             sql_url=f"sqlite:///{db_path}/faiss_db.db",
-            faiss_index_factory_str="Flat",
-            index="image_files",
-            embedding_dim=512,
-            similarity="cosine",
-            embedding_field="meta",
+            faiss_index_factory_str=config.faiss_settings.index_factory,
+            index=config.faiss_settings.index,
+            embedding_dim=config.faiss_settings.dimensions,
+            similarity=config.faiss_settings.similarity_function,
+            embedding_field=config.faiss_settings.embedding_field,
         )
 
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
@@ -132,11 +132,11 @@ def get_multimodal_retriever(document_store, search_type):
     retriever_text_to_image = MultiModalRetriever(
         document_store=document_store,
         query_type=f"{search_type}",
-        query_embedding_model="sentence-transformers/clip-ViT-B-32",
+        query_embedding_model=config.retriever_settings.model,
         document_embedding_models={f"{search_type}": "sentence-transformers/clip-ViT-B-32"},
-        top_k=3,
-        similarity_function="cosine",
-        devices=[config.multimodalretriever.devices],
+        top_k=config.retriever_settings.top_k,
+        similarity_function=config.retriever_settings.similarity_function,
+        devices=[config.retriever_settings.devices],
     )
     logger.debug("Retriever loaded successfully.")
     return retriever_text_to_image
