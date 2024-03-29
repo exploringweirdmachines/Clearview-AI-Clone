@@ -50,8 +50,8 @@ def create_parser():
 
     # Create a mutually exclusive group for image_query and text_query
     query_group = load_db_parser.add_mutually_exclusive_group(required=True)
-    query_group.add_argument("-i", "--image_query", type=str, help="Path to the target image to search for images")
-    query_group.add_argument("-t", "--text_query", type=str, help="Text query to search for images")
+    query_group.add_argument("-i", "--image_query", type=str, help="Path to the target image used to search for images")
+    query_group.add_argument("-t", "--text_query", type=str, help="Text query used to search for images")
 
     parser.epilog = f"You can also see help for the commands like '{sys.argv[0]} searchdb -h'"
 
