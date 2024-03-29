@@ -1,7 +1,7 @@
-## ClearView-AI 
+## find-Ilya
 
-The title is kinda misleading but the idea is the same: using an image to find similar images.
-A better name, more descriptive would be "image-to-image search" tool. The fact that you can search for faces, is just a feature, not a bug.
+Using an image to find similar images.
+More accurate description would be "image-to-image" search tool, but also a "text-to-image" search tool.
 
 ## Usage
 
