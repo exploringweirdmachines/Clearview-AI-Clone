@@ -27,9 +27,9 @@ options:
   -d DB_PATH, --db_path DB_PATH
                         Path to the FAISS database
   -i IMAGE_QUERY, --image_query IMAGE_QUERY
-                        Path to the target image to search for images
+                        Path to the target image used to search for images
   -t TEXT_QUERY, --text_query TEXT_QUERY
-                        Text query to search for images
+                        Text query used to search for images
 
 ```
 
