@@ -1,7 +1,7 @@
 import argparse
 import atexit
 from typing import Optional
-
+import warnings
 import box
 import sys
 import yaml
@@ -13,6 +13,10 @@ import logging.handlers
 from haystack.document_stores import FAISSDocumentStore
 from haystack.nodes import MultiModalRetriever
 from haystack import Document
+
+
+warnings.filterwarnings("ignore", category=UserWarning, message='TypedStorage is deprecated')
+
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +89,7 @@ def create_db(folder_path, images_path):
             embedding_dim=config.faiss_settings.dimensions,
             similarity=config.faiss_settings.similarity_function,
             embedding_field=config.faiss_settings.embedding_field,
+            progress_bar=False
         )
 
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
@@ -137,6 +142,7 @@ def get_multimodal_retriever(document_store, search_type):
         top_k=config.retriever_settings.top_k,
         similarity_function=config.retriever_settings.similarity_function,
         devices=[config.retriever_settings.devices],
+        progress_bar=False
     )
     logger.debug("Retriever loaded successfully.")
     return retriever_text_to_image
