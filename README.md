@@ -47,6 +47,8 @@ Then you can search for similar images like this:
 poetry run python main.py search_db -d examples/vector_database/ -i examples/target_image/Ilya.png
 ```
 
+![Ilya.png](resources/search_image_to_image.gif)
+
 ## Examples
 
 Given the input image found in 'examples/target_image/Ilya.png'
@@ -55,6 +57,7 @@ Given the input image found in 'examples/target_image/Ilya.png'
 ```bash
 poetry run python main.py search_db -d examples/vector_database/ -i examples/target_image/Ilya.png
 ```
+
 
 #### Input image
 ![Ilya.png](examples%2Ftarget_image%2FIlya.png)
@@ -123,6 +126,11 @@ These are the images you can find in 'examples/images' folder:
 ![images_dataset.png](resources%2Fimages_dataset.png)
 
 ## Requirements
+
+My setup is:
+
+WIN 10 + nvidia drivers 522 + cuda 11.8 + WSL2 with Ubuntu 22.04 with cuda tools + WSL default python installation >=3.10
+
 ```bash
 poetry install
 ```
