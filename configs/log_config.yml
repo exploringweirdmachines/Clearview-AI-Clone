@@ -58,3 +58,23 @@ loggers:
     level: DEBUG
     handlers:
     - queue_handler
+
+  sentence_transformers:
+    level: WARNING
+    handlers:
+      - queue_handler
+
+  haystack:
+    level: WARNING
+    handlers:
+      - queue_handler
+
+  transformers:
+    level: WARNING
+    handlers:
+      - queue_handler
+
+  faiss-gpu:
+    level: DEBUG
+    handlers:
+      - queue_handler
